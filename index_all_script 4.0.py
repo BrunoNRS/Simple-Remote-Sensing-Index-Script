@@ -9,7 +9,7 @@ import earthpy.plot as ep
 import matplotlib as mpl
 mpl.use('Agg')
 
-folder = ("D:\Embrapa\Gerais")
+folder = ("C:\Directory")
 
 for file in glob.glob('*.tif'):
     new_dir = file.rsplit('.', 1)[0]
