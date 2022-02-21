@@ -62,7 +62,7 @@ for imgpath in glob.glob(os.path.join(img, '*.tif')):
     kwargs.update(
         dtype=rasterio.float32,
         count = 1)
-    
+    #------------------------------------------------------------------------------------------------------------------------#
     ndvi_index = (N - R)/(N + R)
     
     ep.plot_bands(ndvi_index,
@@ -75,8 +75,7 @@ for imgpath in glob.glob(os.path.join(img, '*.tif')):
     
     with rasterio.open(os.path.join(out, output_path, "Index_GeoTIFF", imgname + "NDVI.tif"), 'w', **kwargs) as dst:
             dst.write_band(1, ndvi_index.astype(rasterio.float32))
-    
-    
+    #------------------------------------------------------------------------------------------------------------------------#        
     savi_index = ((N - R) / (N + R + L)) * (1 + L)
 
     ep.plot_bands(savi_index,
@@ -89,7 +88,7 @@ for imgpath in glob.glob(os.path.join(img, '*.tif')):
 
     with rasterio.open(os.path.join(out, output_path, "Index_GeoTIFF", imgname + "SAVI.tif"), 'w', **kwargs) as dst:
             dst.write_band(1, savi_index.astype(rasterio.float32))
-
+    #------------------------------------------------------------------------------------------------------------------------#        
     vig_index = (G - R) / (G + R)
 
     ep.plot_bands(vig_index,
@@ -102,7 +101,7 @@ for imgpath in glob.glob(os.path.join(img, '*.tif')):
 
     with rasterio.open(os.path.join(out, output_path, "Index_GeoTIFF", imgname + "VIG.tif"), 'w', **kwargs) as dst:
             dst.write_band(1, vig_index.astype(rasterio.float32))
-
+    #------------------------------------------------------------------------------------------------------------------------#        
     exg_index = 2 * G - R - B
 
     ep.plot_bands(exg_index,
@@ -115,7 +114,7 @@ for imgpath in glob.glob(os.path.join(img, '*.tif')):
 
     with rasterio.open(os.path.join(out, output_path, "Index_GeoTIFF", imgname + "ExG.tif"), 'w', **kwargs) as dst:
             dst.write_band(1, exg_index.astype(rasterio.float32))
-
+    #------------------------------------------------------------------------------------------------------------------------#        
     gli_index = (2.0 * G - R - B) / (2.0 * G + R + B)
 
     ep.plot_bands(gli_index,
@@ -128,7 +127,7 @@ for imgpath in glob.glob(os.path.join(img, '*.tif')):
 
     with rasterio.open(os.path.join(out, output_path, "Index_GeoTIFF", imgname + "GLI.tif"), 'w', **kwargs) as dst:
             dst.write_band(1, gli_index.astype(rasterio.float32))
-
+    #------------------------------------------------------------------------------------------------------------------------#        
     mgrvi_index = (G ** 2.0 - R ** 2.0) / (G ** 2.0 + R ** 2.0)
 
     ep.plot_bands(mgrvi_index,
@@ -141,7 +140,7 @@ for imgpath in glob.glob(os.path.join(img, '*.tif')):
 
     with rasterio.open(os.path.join(out, output_path, "Index_GeoTIFF", imgname + "MGRVI.tif"), 'w', **kwargs) as dst:
             dst.write_band(1, mgrvi_index.astype(rasterio.float32))
-
+    #------------------------------------------------------------------------------------------------------------------------#        
     ndwi_index = (G - N) / (G + N)
 
     ep.plot_bands(ndwi_index,
@@ -154,7 +153,7 @@ for imgpath in glob.glob(os.path.join(img, '*.tif')):
 
     with rasterio.open(os.path.join(out, output_path, "Index_GeoTIFF", imgname + "NDWI.tif"), 'w', **kwargs) as dst:
             dst.write_band(1, ndwi_index.astype(rasterio.float32))
-
+    #------------------------------------------------------------------------------------------------------------------------#
     colors = ['b', 'g', 'r', 'k', 'tomato', 'purple']
     titles = [ imgname + " \n Blue",  imgname + " \n Green",  imgname + " \n Red",  imgname + " \n Near Infrared",  imgname + " \n Red Edge",  imgname + " \n Thermal"]
 
@@ -164,7 +163,7 @@ for imgpath in glob.glob(os.path.join(img, '*.tif')):
             cols=2)
 
     plt.savefig(os.path.join(out, output_path, imgname + " Histogram.png"), bbox_inches='tight')
-
+    #------------------------------------------------------------------------------------------------------------------------#
     ep.plot_bands(T,
                   title=imgname + " \n Thermal",
                   cbar=True,
@@ -173,7 +172,7 @@ for imgpath in glob.glob(os.path.join(img, '*.tif')):
                   vmin=15, vmax=50)
 
     plt.savefig(os.path.join(out, output_path, imgname + " Thermal.png"), bbox_inches='tight')
-
+    #------------------------------------------------------------------------------------------------------------------------#
     for saved_indexes in glob.glob(os.path.join(out, output_path, "Index_GeoTIFF", '*.tif')):
         indexes = rxr.open_rasterio(saved_indexes)
 
