@@ -251,6 +251,22 @@ for shapepath in glob.glob(os.path.join(shape_directory, '*.shp')):
                           vmin=15, vmax=50)
 
             plt.savefig(os.path.join(output_path, outname + " Thermal.png"), bbox_inches='tight')
+
+            for saved_indexes in glob.glob(os.path.join(output_path, "Index_GeoTIFF", '*.tif')):
+                indexes = rxr.open_rasterio(saved_indexes)
+
+                colors = ['b', 'g', 'r', 'k', 'tomato', 'purple']
+                titles = [ outname + " \n Blue",  outname + " \n Green",  outname + " \n Red",  outname + " \n Near Infrared",  outname + " \n Red Edge",  outname + " \n Thermal"]
+                
+                ep.hist(saved_indexes.values, 
+                    colors=colors, 
+                    title=titles, 
+                    cols=2)
+
+
+            
+
+
         
 
 
