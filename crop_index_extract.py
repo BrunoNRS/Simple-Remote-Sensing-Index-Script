@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Feb 18 14:58:08 2022
 
+"""
 @author: Bruno do Nascimento (bruno.do.nrs@gmail.com)
 """
 
