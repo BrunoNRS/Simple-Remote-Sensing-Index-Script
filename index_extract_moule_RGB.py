@@ -67,7 +67,7 @@ for imgpath in glob.glob(os.path.join(img, '*.tif')):
                   vmin=0, vmax=1,
                   title="Visible Normalized Difference Vegetation Index(vNDVI)\n" + imgname)
 
-    plt.savefig(os.path.join(out, output_path,  imgname + " NDVI.png"), bbox_inches='tight')
+    plt.savefig(os.path.join(out, output_path,  imgname + " vNDVI.png"), bbox_inches='tight')
     
     with rasterio.open(os.path.join(out, output_path, "Index_GeoTIFF", imgname + "NDVI.tif"), 'w', **kwargs) as dst:
             dst.write_band(1, vndvi_index.astype(rasterio.float32))
@@ -134,13 +134,13 @@ for imgpath in glob.glob(os.path.join(img, '*.tif')):
 
     plt.savefig(os.path.join(out, output_path, imgname + " Histogram.png"), bbox_inches='tight')
     #------------------------------------------------------------------------------------------------------------------------#
-    for saved_indexes in glob.glob(os.path.join(out, output_path, "Index_GeoTIFF", '*.tif')):
-        indexes = rxr.open_rasterio(saved_indexes)
+    # for saved_indexes in glob.glob(os.path.join(out, output_path, "Index_GeoTIFF", '*.tif')):
+    #     indexes = rxr.open_rasterio(saved_indexes)
 
-        colors = ['b', 'g', 'r', 'k', 'tomato', 'purple']
-        titles = [ imgname + " \n Blue",  imgname + " \n Green",  imgname + " \n Red",  imgname + " \n Near Infrared",  imgname + " \n Red Edge",  imgname + " \n Thermal"]
+    #     colors = ['b', 'g', 'r', 'k', 'tomato', 'purple']
+    #     titles = [ imgname + " \n Blue",  imgname + " \n Green",  imgname + " \n Red",  imgname + " \n Near Infrared",  imgname + " \n Red Edge",  imgname + " \n Thermal"]
         
-        ep.hist(saved_indexes.values, 
-            colors=colors, 
-            title=titles, 
-            cols=2)
+    #     ep.hist(saved_indexes.values, 
+    #         colors=colors, 
+    #         title=titles, 
+    #         cols=2)
