@@ -1,8 +1,8 @@
 """
 @author: Bruno do Nascimento (bruno.do.nrs@gmail.com)
 """
-# WARNING: This Script Is Designed for the Micasense Altum Multiespectral Camera 
-
+# WARNING: This script is designed for the micasense altum multiespectral camera
+# Ver 2.5
 from builtins import WindowsError
 import glob, os
 import matplotlib.pyplot as plt
