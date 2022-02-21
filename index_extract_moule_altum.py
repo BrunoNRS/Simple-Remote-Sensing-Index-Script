@@ -2,6 +2,7 @@
 """
 @author: Bruno do Nascimento (bruno.do.nrs@gmail.com)
 """
+# WARNING: This Script Is Designed for the Micasense Altum Multiespectral Camera 
 
 from builtins import WindowsError
 import glob, os
@@ -20,50 +21,38 @@ import rasterio.mask
 #from rasterio.warp import calculate_default_transform, reproject, Resampling
 mpl.use('Agg')
 
-# Define Original GeoTiff file location
-imagery = ("Photos/")
+# Define GeoTiff files location
+img = ("Photos/")
 
-# Define Output for Indexing
-outimg = ("Crop/")
-
-for outpath in glob.glob(os.path.join(outimg, '*.tif')):
-    #print(outpath)
-    outfile =  os.path.basename(outpath)
-    #print(outfile)
-    outname = os.path.splitext(outfile)[0]
-    #print(outname)
+for imgpath in glob.glob(os.path.join(img, '*.tif')):
+    #print(imgpath)
+    imgfile =  os.path.basename(imgpath)
+    #print(imgfile)
+    imgname = os.path.splitext(imgfile)[0]
+    #print(imgname)
     
-    # orto = rxr.open_rasterio(outpath)
-    
-    output_path = outname + "_output"
+    output_path = imgname + "_output"
     
     try:
         os.mkdir(output_path)
     except WindowsError:
     # Handle the case where the target dir already exist.
         pass
-
+    
     try:
         os.mkdir(os.path.join(output_path, "Index_GeoTIFFF"))
     except WindowsError:
         pass
     
-    # B = orto[0]
-    # G = orto[1]
-    # R = orto[2]
-    # N = orto[3]
-    # T = orto[5] / 100 - 273.15
-    # L = 0.5
-    
-    with rasterio.open(outpath) as src:
+    with rasterio.open(imgpath) as src:
         B = src.read(1)
-    with rasterio.open(outpath) as src:
+    with rasterio.open(imgpath) as src:
         G = src.read(2)
-    with rasterio.open(outpath) as src:
+    with rasterio.open(imgpath) as src:
         R = src.read(3)
-    with rasterio.open(outpath) as src:
+    with rasterio.open(imgpath) as src:
         N = src.read(4)
-    with rasterio.open(outpath) as src:
+    with rasterio.open(imgpath) as src:
         T = src.read(6)
     L = 0.5
         
@@ -78,11 +67,11 @@ for outpath in glob.glob(os.path.join(outimg, '*.tif')):
                   cmap='RdYlGn',
                   scale=False,
                   vmin=0, vmax=1,
-                  title="Normalized Difference Vegetation Index(NDVI)\n" + outname)
+                  title="Normalized Difference Vegetation Index(NDVI)\n" + imgname)
 
-    plt.savefig(os.path.join(output_path,  outname + " NDVI.png"), bbox_inches='tight')
+    plt.savefig(os.path.join(output_path,  imgname + " NDVI.png"), bbox_inches='tight')
     
-    with rasterio.open(os.path.join(output_path, "Index_GeoTIFF", outname + "NDVI.tif"), 'w', **kwargs) as dst:
+    with rasterio.open(os.path.join(output_path, "Index_GeoTIFF", imgname + "NDVI.tif"), 'w', **kwargs) as dst:
             dst.write_band(1, ndvi_index.astype(rasterio.float32))
     
     
@@ -92,11 +81,11 @@ for outpath in glob.glob(os.path.join(outimg, '*.tif')):
                   cmap='RdYlGn',
                   scale=False,
                   vmin=0, vmax=1,
-                  title="Soil-Adjusted Vegetation Index(SAVI)\n " + outname)
+                  title="Soil-Adjusted Vegetation Index(SAVI)\n " + imgname)
 
-    plt.savefig(os.path.join(output_path, outname + " SAVI.png"), bbox_inches='tight')
+    plt.savefig(os.path.join(output_path, imgname + " SAVI.png"), bbox_inches='tight')
 
-    with rasterio.open(os.path.join(output_path, "Index_GeoTIFF", outname + "SAVI.tif"), 'w', **kwargs) as dst:
+    with rasterio.open(os.path.join(output_path, "Index_GeoTIFF", imgname + "SAVI.tif"), 'w', **kwargs) as dst:
             dst.write_band(1, savi_index.astype(rasterio.float32))
 
     vig_index = (G - R) / (G + R)
@@ -105,11 +94,11 @@ for outpath in glob.glob(os.path.join(outimg, '*.tif')):
                   cmap='RdYlGn',
                   scale=False,
                   vmin=0, vmax=1,
-                  title="Vegetation Index Green(VIG)\n " + outname)
+                  title="Vegetation Index Green(VIG)\n " + imgname)
 
-    plt.savefig(os.path.join(output_path, outname + " VIG.png"), bbox_inches='tight')
+    plt.savefig(os.path.join(output_path, imgname + " VIG.png"), bbox_inches='tight')
 
-    with rasterio.open(os.path.join(output_path, "Index_GeoTIFF", outname + "VIG.tif"), 'w', **kwargs) as dst:
+    with rasterio.open(os.path.join(output_path, "Index_GeoTIFF", imgname + "VIG.tif"), 'w', **kwargs) as dst:
             dst.write_band(1, vig_index.astype(rasterio.float32))
 
     exg_index = 2 * G - R - B
@@ -118,11 +107,11 @@ for outpath in glob.glob(os.path.join(outimg, '*.tif')):
                   cmap='RdYlGn',
                   scale=False,
                   vmin=0, vmax=1,
-                  title="Excess Green Index(ExG)\n " + outname)
+                  title="Excess Green Index(ExG)\n " + imgname)
 
-    plt.savefig(os.path.join(output_path, outname + " ExG.png"), bbox_inches='tight')
+    plt.savefig(os.path.join(output_path, imgname + " ExG.png"), bbox_inches='tight')
 
-    with rasterio.open(os.path.join(output_path, "Index_GeoTIFF", outname + "ExG.tif"), 'w', **kwargs) as dst:
+    with rasterio.open(os.path.join(output_path, "Index_GeoTIFF", imgname + "ExG.tif"), 'w', **kwargs) as dst:
             dst.write_band(1, exg_index.astype(rasterio.float32))
 
     gli_index = (2.0 * G - R - B) / (2.0 * G + R + B)
@@ -131,11 +120,11 @@ for outpath in glob.glob(os.path.join(outimg, '*.tif')):
                   cmap='RdYlGn',
                   scale=False,
                   vmin=0, vmax=1,
-                  title="Green Leaf Index(GLI)\n " + outname)
+                  title="Green Leaf Index(GLI)\n " + imgname)
 
-    plt.savefig(os.path.join(output_path, outname + " GLI.png"), bbox_inches='tight')
+    plt.savefig(os.path.join(output_path, imgname + " GLI.png"), bbox_inches='tight')
 
-    with rasterio.open(os.path.join(output_path, "Index_GeoTIFF", outname + "GLI.tif"), 'w', **kwargs) as dst:
+    with rasterio.open(os.path.join(output_path, "Index_GeoTIFF", imgname + "GLI.tif"), 'w', **kwargs) as dst:
             dst.write_band(1, gli_index.astype(rasterio.float32))
 
     mgrvi_index = (G ** 2.0 - R ** 2.0) / (G ** 2.0 + R ** 2.0)
@@ -144,11 +133,11 @@ for outpath in glob.glob(os.path.join(outimg, '*.tif')):
                   cmap='RdYlGn',
                   scale=False,
                   vmin=0, vmax=1,
-                  title="Modified Green Red Vegetation Index(MGRVI)\n " + outname)
+                  title="Modified Green Red Vegetation Index(MGRVI)\n " + imgname)
 
-    plt.savefig(os.path.join(output_path, outname + " MGRVI.png"), bbox_inches='tight')
+    plt.savefig(os.path.join(output_path, imgname + " MGRVI.png"), bbox_inches='tight')
 
-    with rasterio.open(os.path.join(output_path, "Index_GeoTIFF", outname + "MGRVI.tif"), 'w', **kwargs) as dst:
+    with rasterio.open(os.path.join(output_path, "Index_GeoTIFF", imgname + "MGRVI.tif"), 'w', **kwargs) as dst:
             dst.write_band(1, mgrvi_index.astype(rasterio.float32))
 
     ndwi_index = (G - N) / (G + N)
@@ -157,40 +146,39 @@ for outpath in glob.glob(os.path.join(outimg, '*.tif')):
                   cmap='RdYlGn',
                   scale=False,
                   vmin=0, vmax=1,
-                  title="Normalized Difference Water Index(NDWI)\n " + outname)
+                  title="Normalized Difference Water Index(NDWI)\n " + imgname)
 
-    plt.savefig(os.path.join(output_path, outname + " NDWI.png"), bbox_inches='tight')
+    plt.savefig(os.path.join(output_path, imgname + " NDWI.png"), bbox_inches='tight')
 
-    with rasterio.open(os.path.join(output_path, "Index_GeoTIFF", outname + "NDWI.tif"), 'w', **kwargs) as dst:
+    with rasterio.open(os.path.join(output_path, "Index_GeoTIFF", imgname + "NDWI.tif"), 'w', **kwargs) as dst:
             dst.write_band(1, ndwi_index.astype(rasterio.float32))
 
     colors = ['b', 'g', 'r', 'k', 'tomato', 'purple']
-    titles = [ outname + " \n Blue",  outname + " \n Green",  outname + " \n Red",  outname + " \n Near Infrared",  outname + " \n Red Edge",  outname + " \n Thermal"]
+    titles = [ imgname + " \n Blue",  imgname + " \n Green",  imgname + " \n Red",  imgname + " \n Near Infrared",  imgname + " \n Red Edge",  imgname + " \n Thermal"]
 
     ep.hist(src.values, 
             colors=colors, 
             title=titles, 
             cols=2)
 
-    plt.savefig(os.path.join(output_path, outname + " Histogram.png"), bbox_inches='tight')
+    plt.savefig(os.path.join(output_path, imgname + " Histogram.png"), bbox_inches='tight')
 
     ep.plot_bands(T,
-                  title=outname + " \n Thermal",
+                  title=imgname + " \n Thermal",
                   cbar=True,
                   cmap='CMRmap',
                   scale=False,
                   vmin=15, vmax=50)
 
-    plt.savefig(os.path.join(output_path, outname + " Thermal.png"), bbox_inches='tight')
+    plt.savefig(os.path.join(output_path, imgname + " Thermal.png"), bbox_inches='tight')
 
     for saved_indexes in glob.glob(os.path.join(output_path, "Index_GeoTIFF", '*.tif')):
         indexes = rxr.open_rasterio(saved_indexes)
 
         colors = ['b', 'g', 'r', 'k', 'tomato', 'purple']
-        titles = [ outname + " \n Blue",  outname + " \n Green",  outname + " \n Red",  outname + " \n Near Infrared",  outname + " \n Red Edge",  outname + " \n Thermal"]
+        titles = [ imgname + " \n Blue",  imgname + " \n Green",  imgname + " \n Red",  imgname + " \n Near Infrared",  imgname + " \n Red Edge",  imgname + " \n Thermal"]
         
         ep.hist(saved_indexes.values, 
             colors=colors, 
             title=titles, 
-            cols=2) 
-
+            cols=2)
