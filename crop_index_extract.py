@@ -113,7 +113,7 @@ for shapepath in glob.glob(os.path.join(shape_directory, '*.shp')):
                 pass
 
             try:
-                os.mkdir(os.path,join(output_path, "Index_GeoTIFFF"))
+                os.mkdir(os.path.join(output_path, "Index_GeoTIFFF"))
             except WindowsError:
                 pass
             
