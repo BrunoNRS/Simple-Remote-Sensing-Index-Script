@@ -23,9 +23,7 @@ out = "/home/bruno/Projects/Orto Fotos/Projeto Uva/Plant/Output"
 for imgpath in glob.glob(os.path.join(img, '*.tif')):
     imgfile =  os.path.basename(imgpath)
     imgname = os.path.splitext(imgfile)[0]
-    
-    output_path = imgname + "_output"
-    
+        
     raster = rasterio.open(imgpath)
 
     def normalize(array):
