@@ -1,3 +1,5 @@
+#This script is to be used only on images taken from a MicaSense Altum camera, usage on a different model of camera may require 
+#modification of the script
 import os, glob
 from osgeo import gdal
 import numpy as np
@@ -6,13 +8,21 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 mpl.use('Agg')
 
-in_path = "D:\PARA_PROCESSAR\Testes"
-out_path = "D:\PARA_PROCESSAR\Testes\out"
+#Path to image file or directory
+in_path = "PATH/TO/IMAGE/FOLDER"
 
+#Path to output directory
+out_path = "OUTPUT/DIRECTORY"
+
+#Nodata number for masking, this varies from sensor to sensor, this script uses "65535" for the nodata values when cropping.
+nodata = (65535)
+
+#Normalization Algorithm
 def normalize(array):
     array_min, array_max = array.min(), array.max()
     return (array - array_min) / (array_max - array_min)
 
+#Define write to file process, insert index array and the name of the file, don't insert ".tif" it's already in the process
 def write_to_file(array, name):
         rows, cols = array.shape
         driver = gdal.GetDriverByName("GTiff")
@@ -36,8 +46,7 @@ def write_to_file(array, name):
         outdata.FlushCache()
         outdata = None
 
-nodata = (65535)
-
+#Main indexation process
 for imgpath in glob.glob(os.path.join(in_path, '*.tif')):
     imgfile =  os.path.basename(imgpath)
     imgname = os.path.splitext(imgfile)[0]
