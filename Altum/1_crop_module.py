@@ -4,11 +4,11 @@ import rasterio
 import rasterio.mask
 
 #Image folder directory
-img = "D:/PARA_PROCESSAR/Testes/20200903_uva_1030_altum_orto_pixel20cm.tif"
+img = "path/to/img.tif"
 #Shape files directory 
-shp_path = "D:/PARA_PROCESSAR"
+shp_path = "path/to/shps"
 #Output directory
-out_path = "D:/PARA_PROCESSAR/Testes"
+out_path = "path/to/out"
 #Nodata value for border
 no_data = 65535
 
