@@ -50,6 +50,7 @@ def write_to_file(array, name):
 for imgpath in glob.glob(os.path.join(in_path, '*.tif')):
     imgfile =  os.path.basename(imgpath)
     imgname = os.path.splitext(imgfile)[0]
+    print(imgname)
 
     img = gdal.Open (imgpath)
 
