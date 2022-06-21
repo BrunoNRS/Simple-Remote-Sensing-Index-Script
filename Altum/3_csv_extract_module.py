@@ -1,16 +1,15 @@
 import glob,numpy, csv, os
 from osgeo import gdal
 
-data_set_name = "65-Orthomosaic-Uva de suco_rgb_20170515"
-img = "D:/Karine/Processar python/20170515_0.4"
+#Input image directory
+img = "/path/to/images"
+
+data_set_name = os.path.basename(img)
 
 def getvalue(file):
     ds = gdal.Open(file)
     band = ds.GetRasterBand(1)
     data = band.ReadAsArray()
-    nodata = band.GetNoDataValue()
-    # if nodata is not None:
-    #     data = numpy.ma.masked_equal(data,nodata,numpy.isnan(data))
     mean = numpy.nanmean(data)
     namee = os.path.basename(file)
     name = os.path.splitext(namee)[0]
@@ -20,16 +19,6 @@ def getvalue(file):
     min = numpy.nanmin(data)
     max = numpy.nanmax(data)
     return(name,mean,var,std,min,max)
-
-# # Define inputs folder
-# root = Tkinter.Tk()
-# inputs = tkFileDialog.askdirectory()    
-# root.destroy()
-# print(inputs+" selecionado.")
-
-# if (inputs == None): 
-# 	sair = raw_input('Pasta de entrada nao selecionada.\nPressione enter para sair.\n')
-# 	sys.exit()
 
 inputs = glob.glob(os.path.join(img,"*.tif"))
 
