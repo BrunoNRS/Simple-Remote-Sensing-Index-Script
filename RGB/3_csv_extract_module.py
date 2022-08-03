@@ -6,10 +6,13 @@ img = "/path/to/images"
 
 data_set_name = os.path.basename(img)
 
+nodata = 255
+
 def getvalue(file):
     ds = gdal.Open(file)
     band = ds.GetRasterBand(1)
-    data = band.ReadAsArray()
+    data_nm = band.ReadAsArray()
+    data = numpy.ma.masked_array(data_nm, mask=(data_nm== nodata))
     mean = numpy.nanmean(data)
     namee = os.path.basename(file)
     name = os.path.splitext(namee)[0]
