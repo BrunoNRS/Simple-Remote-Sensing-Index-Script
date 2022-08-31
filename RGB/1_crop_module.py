@@ -10,7 +10,7 @@ shp_path = "D:/PARA_PROCESSAR"
 #Output directory
 out_path = "D:/PARA_PROCESSAR/Testes"
 #Nodata value for border
-no_data = 65535
+no_data = 255
 
 for shapepath in glob.glob(os.path.join(shp_path, "*.shp")):
     shapefile =  os.path.basename(shapepath)
