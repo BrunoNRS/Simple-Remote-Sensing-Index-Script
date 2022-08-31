@@ -12,8 +12,8 @@ in_path = "PATH/TO/IMAGE/FOLDER"
 #Path to output directory
 out_path = "OUTPUT/DIRECTORY"
 
-#Nodata number for masking, this varies from sensor to sensor, this script uses "65535" for the nodata values when cropping.
-nodata = (65535)
+#Nodata number for masking, this varies from sensor to sensor, this script uses "255" for the nodata values when cropping.
+nodata = (255)
 
 for imgpath in glob.glob(os.path.join(in_path, '*.tif')):
     imgfile =  os.path.basename(imgpath)
@@ -63,78 +63,136 @@ for imgpath in glob.glob(os.path.join(in_path, '*.tif')):
     
     NDVI = (N - R)/(N + R)
     
+    ep.plot_bands(NDVI,
+              cmap='RdYlGn',
+              scale=False,
+              vmin=-1, vmax=1,
+              title="Normalized Difference Vegetation Index(NDVI)\n " + imgname)
+    
+    plt.savefig(os.path.join(out_path, imgname + " NDVI.png"), bbox_inches='tight')
+
+
     ep.hist(NDVI,
             figsize=(12, 6),
             title="Normalized Difference Vegetation Index(NDVI) Histogram\n " + imgname)
-    
+
     plt.savefig(os.path.join(out_path, imgname + " NDVI Histogram.png"), bbox_inches='tight')
-    
+
     write_to_file(NDVI, imgname + " NDVI")
     print("NDVI OK")
-    
+
+
     SAVI = ((N - R) / (N + R + L)) * (1 + L)
+    
+    ep.plot_bands(SAVI,
+              cmap='RdYlGn',
+              scale=False,
+              vmin=-1, vmax=1,
+              title="Soil-Adjusted Vegetation Index(SAVI)\n " + imgname)
+    
+    plt.savefig(os.path.join(out_path, imgname + " SAVI.png"), bbox_inches='tight')
     
     ep.hist(SAVI,
             figsize=(12, 6),
             title="Soil-Adjusted Vegetation Index(SAVI) Histogram\n " + imgname)
-    
+
     plt.savefig(os.path.join(out_path, imgname + " SAVI Histogram.png"), bbox_inches='tight')
-    
+
     write_to_file(SAVI, imgname + " SAVI")
     print("SAVI OK")
-    
+
     VIG = (G - R) / (G + R)
     
+    ep.plot_bands(VIG,
+              cmap='RdYlGn',
+              scale=False,
+              vmin=-1, vmax=1,
+              title="Vegetation Index Green(VIG)\n " + imgname)
+    
+    plt.savefig(os.path.join(out_path, imgname + " VIG.png"), bbox_inches='tight')
+
     ep.hist(VIG,
             figsize=(12, 6),
             title="Vegetation Index Green(VIG) Histogram\n " + imgname)
-    
+
     plt.savefig(os.path.join(out_path, imgname + " VIG Histogram.png"), bbox_inches='tight')
-    
+
     write_to_file(VIG, imgname + " VIG")
     print("VIG OK")
-    
+
     EXG = 2 * G - R - B
     
+    ep.plot_bands(EXG,
+              cmap='RdYlGn',
+              scale=False,
+              vmin=-1, vmax=1,
+              title="Excess Green Index(ExG)\n " + imgname)
+    
+    plt.savefig(os.path.join(out_path, imgname + " ExG.png"), bbox_inches='tight')
+
     ep.hist(EXG,
             figsize=(12, 6),
             title="Excess Green Index(ExG) Histogram\n " + imgname)
-    
+
     plt.savefig(os.path.join(out_path, imgname + " ExG Histogram.png"), bbox_inches='tight')
-    
+
     write_to_file(EXG, imgname + " EXG")
     print("EXG OK")
-    
+
     GLI = (2.0 * G - R - B) / (2.0 * G + R + B)
     
+    ep.plot_bands(GLI,
+              cmap='RdYlGn',
+              scale=False,
+              vmin=-1, vmax=1,
+              title="Green Leaf Index(GLI)\n " + imgname)
+    
+    plt.savefig(os.path.join(out_path, imgname + " GLI.png"), bbox_inches='tight')
+
     ep.hist(GLI,
             figsize=(12, 6),
             title="Green Leaf Index(GLI) Histogram\n " + imgname)
-    
+
     plt.savefig(os.path.join(out_path, imgname + " GLI Histogram.png"), bbox_inches='tight')
-    
+
     write_to_file(GLI, imgname + " GLI")
     print("GLI OK")
-    
+
     MGRVI= (G ** 2.0 - R ** 2.0) / (G ** 2.0 + R ** 2.0)
     
+    ep.plot_bands(MGRVI,
+              cmap='RdYlGn',
+              scale=False,
+              vmin=-1, vmax=1,
+              title="Modified Green Red Vegetation Index(MGRVI)\n " + imgname)
+    
+    plt.savefig(os.path.join(out_path, imgname + " MGRVI.png"), bbox_inches='tight')
+
     ep.hist(MGRVI,
             figsize=(12, 6),
             title="Modified Green Red Vegetation Index(MGRVI) Histogram\n " + imgname)
-    
+
     plt.savefig(os.path.join(out_path, imgname + " MGRVI Histogram.png"), bbox_inches='tight')
-    
+
     write_to_file(MGRVI, imgname + " MGRVI")
-    print("MGRVI OK")
-    
+    print("MGVRI OK")
+
     NDWI = (G - N) / (G + N)
     
+    ep.plot_bands(NDWI,
+              cmap='RdYlGn',
+              scale=False,
+              vmin=-1, vmax=1,
+              title="Normalized Difference Water Index(NDWI)\n " + imgname)
+    
+    plt.savefig(os.path.join(out_path, imgname + " NDWI.png"), bbox_inches='tight')
+
     ep.hist(NDWI,
             figsize=(12, 6),
             title="Normalized Difference Water Index(NDWI) Histogram\n " + imgname)
-    
+
     plt.savefig(os.path.join(out_path, imgname + " NDWI Histogram.png"), bbox_inches='tight')
-    
+
     write_to_file(NDWI, imgname + " NDWI")
     print("NDWI OK")
     
