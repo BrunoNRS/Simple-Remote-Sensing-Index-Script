@@ -1,36 +1,42 @@
-import glob, os
-import fiona
-import rasterio
-import rasterio.mask
+import glob, os, fiona, rasterio,rasterio.mask
 
-#Image folder directory
-img = "D:/PARA_PROCESSAR/Testes/20200903_uva_1030_altum_orto_pixel20cm.tif"
-#Shape files directory 
-shp_path = "D:/PARA_PROCESSAR"
-#Output directory
-out_path = "D:/PARA_PROCESSAR/Testes"
-#Nodata value for border
+# Image and shapefile directories
+img_dir = (r"path/to/img")
+shp_dir = (r"path/to/shp")
+
+# Output directory
+out_dir = (r"out/path")
+
+# Nodata value for border
 no_data = 255
 
-for shapepath in glob.glob(os.path.join(shp_path, "*.shp")):
-    shapefile =  os.path.basename(shapepath)
-    shapename = os.path.splitext(shapefile)[0]
-    print(shapename)
-   
-    # Read Shape file
-    with fiona.open(shapepath, "r") as shapepath:
-        shapes = [feature["geometry"] for feature in shapepath]
+# Iterate through shapefiles
+for shp_path in glob.glob(os.path.join(shp_dir, "*.shp")):
+    # Get shapefile name
+    shp_name = os.path.splitext(os.path.basename(shp_path))[0]
+    print(shp_name)
 
-    # Read image file
-    with rasterio.open(img) as src:
-        out_image, out_transform = rasterio.mask.mask(src, shapes, crop=True, nodata = no_data)
-        out_meta = src.meta
-
-    # Save clipped image
-    out_meta.update({"driver": "GTiff",
-                      "height": out_image.shape[1],
-                      "width": out_image.shape[2],
-                      "transform": out_transform})
-
-    with rasterio.open(os.path.join(out_path, shapename + '.tif'), "w", **out_meta) as dest:
-        dest.write(out_image)
+    # Read shapefile and extract geometry data
+    with fiona.open(shp_path, "r") as shp:
+        shapes = [feature["geometry"] for feature in shp]
+    # Iterate through images
+    for img_path in glob.glob(os.path.join(img_dir, "*.tif")):
+        # Get image name
+        img_name = os.path.splitext(os.path.basename(img_path))[0]
+        print(img_name)
+        
+        # Read image and mask using shape geometry and nodata value
+        with rasterio.open(img_path) as src:
+            out_image, out_transform = rasterio.mask.mask(src, shapes, crop=True, nodata=no_data)
+            out_meta = src.meta
+        
+        # Update metadata for output image
+        out_meta.update({"driver": "GTiff",
+                         "height": out_image.shape[1],
+                         "width": out_image.shape[2],
+                         "transform": out_transform})
+        
+        # Save masked image
+        out_path = os.path.join(out_dir, f"{img_name}_{shp_name}.tif")
+        with rasterio.open(out_path, "w", **out_meta) as dest:
+            dest.write(out_image)

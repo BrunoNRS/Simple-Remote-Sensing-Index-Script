@@ -1,11 +1,11 @@
 import glob, os, fiona, rasterio,rasterio.mask
 
 # Image and shapefile directories
-img_dir = (r"path/to/img")
-shp_dir = (r"path/to/shp")
+img_dir = (r"D:\Linux Backup\Projects\Cloves\imagens altum\teste\img")
+shp_dir = (r"D:\Linux Backup\Projects\Cloves\shapes")
 
 # Output directory
-out_dir = (r"out/path")
+out_dir = (r"D:\Linux Backup\Projects\Cloves\imagens altum\teste\crop")
 
 # Nodata value for border
 no_data = 65535

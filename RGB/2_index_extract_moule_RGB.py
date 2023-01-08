@@ -6,35 +6,51 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 mpl.use('Agg')
 
-#Path to image file or directory
-in_path = "PATH/TO/IMAGE/FOLDER"
+# Images directory
+img_dir = (r"path\to\images")
 
-#Path to output directory
-out_path = "OUTPUT/DIRECTORY"
+# Output directory
+out_dir = (r"output\path")
 
-#Nodata number for masking, this varies from sensor to sensor, this script uses "255" for the nodata values when cropping.
-nodata = (255)
+# Nodata value for border
+no_data = 255
 
-for imgpath in glob.glob(os.path.join(in_path, '*.tif')):
-    imgfile =  os.path.basename(imgpath)
-    imgname = os.path.splitext(imgfile)[0]
-    print(imgname)
+
+def normalize(array):
+    array_min, array_max = array.min(), array.max()
+    return (array - array_min) / (array_max - array_min)
+
+for img_path in glob.glob(os.path.join(img_dir, '*.tif')):
+    img_name = os.path.splitext(os.path.basename(img_path))[0]
+    print(img_name)
     
-    def normalize(array):
-        array_min, array_max = array.min(), array.max()
-        return (array - array_min) / (array_max - array_min)
+    def gen_hist(array, name, graph_title):
+        ep.hist(array,
+                figsize=(12, 6),
+                title= graph_title + "\n " + img_name)
+        plt.savefig(os.path.join(out_dir, name + " Histogram.png"), bbox_inches='tight')
+        plt.clf()
+    
+    def gen_map(array, name, color_map, v_min, v_max, graph_title):
+        ep.plot_bands(array,
+                cmap=color_map,
+                scale=False,
+                vmin=v_min, vmax=v_max,
+                title=graph_title + "\n" + img_name,)
+        plt.savefig(os.path.join(out_dir, name+".png"), bbox_inches='tight')
+        plt.clf()
     
     def write_to_file(array, name):
             rows, cols = array.shape
             driver = gdal.GetDriverByName("GTiff")
-            out_file = os.path.join(out_path, name+".tif")
+            out_file = os.path.join(out_dir, name+".tif")
             if os.path.exists(out_file):
                 os.remove(out_file)
             outdata = driver.Create(out_file, cols, rows, 1, gdal.GDT_Float32)
             outdata.SetGeoTransform(img.GetGeoTransform())
             outdata.SetProjection(img.GetProjection())
             outdata.GetRasterBand(1).WriteArray(array)
-            outdata.GetRasterBand(1).SetNoDataValue(nodata)
+            outdata.GetRasterBand(1).SetNoDataValue(no_data)
 
             info = outdata.GetGeoTransform()
             part = [i for i in outdata.GetProjection().split(",") if 'UNIT' in i]
@@ -47,167 +63,98 @@ for imgpath in glob.glob(os.path.join(in_path, '*.tif')):
             outdata.FlushCache()
             outdata = None
     
-    img = gdal.Open (imgpath)
-
-    Rnm = np.array(img.GetRasterBand(1).ReadAsArray())
-    Gnm = np.array(img.GetRasterBand(2).ReadAsArray())
-    Bnm = np.array(img.GetRasterBand(3).ReadAsArray())
+    img = gdal.Open (img_path)
     
-    R = np.ma.masked_array(Rnm, mask=(Rnm== nodata))
-    G = np.ma.masked_array(Gnm, mask=(Gnm== nodata))
-    B = np.ma.masked_array(Bnm, mask=(Bnm== nodata))
+    bands = [img.GetRasterBand(i).ReadAsArray() for i in range(1, img.RasterCount+1)]
+    band = np.ma.masked_array(bands, mask=(bands == no_data))
+    bands.append(band)
+    
+    normalized_bands = [normalize(band) for band in bands[:3]]
+    R, G, B = normalized_bands
    
-    N = (G - 360.6) / -1.1941
+    N = normalize((bands[1] - 360.6) / 1.1941)
     
     L = 0.5
     
+    #-------        
     NDVI = (N - R)/(N + R)
+    ndvi_ttl = "Normalized Difference Vegetation Index"
+    ndvi_abbr = "NDVI"
     
-    ep.plot_bands(NDVI,
-              cmap='RdYlGn',
-              scale=False,
-              vmin=-1, vmax=1,
-              title="Normalized Difference Vegetation Index(NDVI)\n " + imgname)
+    gen_map(NDVI, img_name + "_" + ndvi_abbr, 'RdYlGn', -1, 1, ndvi_ttl + " - " + ndvi_abbr)
+    gen_hist(NDVI, img_name + "_" + ndvi_abbr, ndvi_ttl + " - " + ndvi_abbr)
+    write_to_file(NDVI, img_name + "_" + ndvi_abbr)
+    print(ndvi_abbr + " OK!")
+    #-------
+    LAI_NDVI = 4.9 * (NDVI ** 2) + 0.1
+    lai_ndvi_ttl = "Leaf Area Index"
+    lai_ndvi_abbr = "LAI (NDVI)"
     
-    plt.savefig(os.path.join(out_path, imgname + " NDVI.png"), bbox_inches='tight')
-
-
-    ep.hist(NDVI,
-            figsize=(12, 6),
-            title="Normalized Difference Vegetation Index(NDVI) Histogram\n " + imgname)
-
-    plt.savefig(os.path.join(out_path, imgname + " NDVI Histogram.png"), bbox_inches='tight')
-
-    write_to_file(NDVI, imgname + " NDVI")
-    print("NDVI OK")
-
-
+    gen_map(LAI_NDVI, img_name + "_" +  lai_ndvi_abbr, 'RdYlGn', -1, 1,  lai_ndvi_ttl + " - " +  lai_ndvi_abbr)
+    gen_hist(LAI_NDVI, img_name + "_" +  lai_ndvi_abbr,  lai_ndvi_ttl + " - " +  lai_ndvi_abbr)
+    write_to_file(LAI_NDVI, img_name + "_" +  lai_ndvi_abbr)
+    print(lai_ndvi_abbr + " OK!")
+    
+    PAI_NDVI = 5 * (NDVI ** 2) + 1.3
+    pai_ndvi_ttl = "Plant Area Index"
+    pai_ndvi_abbr = "PAI NDVI"
+    
+    gen_map(PAI_NDVI, img_name + "_" +  pai_ndvi_abbr, 'RdYlGn', -1, 1,  pai_ndvi_ttl + " - " +  pai_ndvi_abbr)
+    gen_hist(PAI_NDVI, img_name + "_" +  pai_ndvi_abbr,  pai_ndvi_ttl + " - " +  pai_ndvi_abbr)
+    write_to_file(PAI_NDVI, img_name + "_" +  pai_ndvi_abbr)
+    print(pai_ndvi_abbr + " OK!")
+    
     SAVI = ((N - R) / (N + R + L)) * (1 + L)
+    savi_ttl = "Soil-Adjusted Vegetation Index"
+    savi_abbr = "SAVI"
     
-    ep.plot_bands(SAVI,
-              cmap='RdYlGn',
-              scale=False,
-              vmin=-1, vmax=1,
-              title="Soil-Adjusted Vegetation Index(SAVI)\n " + imgname)
-    
-    plt.savefig(os.path.join(out_path, imgname + " SAVI.png"), bbox_inches='tight')
-    
-    ep.hist(SAVI,
-            figsize=(12, 6),
-            title="Soil-Adjusted Vegetation Index(SAVI) Histogram\n " + imgname)
-
-    plt.savefig(os.path.join(out_path, imgname + " SAVI Histogram.png"), bbox_inches='tight')
-
-    write_to_file(SAVI, imgname + " SAVI")
-    print("SAVI OK")
-
+    gen_map(SAVI, img_name + "_" + savi_abbr, 'RdYlGn', -1, 1, savi_ttl + " - " + savi_abbr)
+    gen_hist(SAVI, img_name + "_" + savi_abbr, savi_ttl + " - " + savi_abbr)
+    write_to_file(SAVI, img_name + "_" + savi_abbr)
+    print(savi_abbr + " OK!")
+    #-------
     VIG = (G - R) / (G + R)
+    vig_ttl = "Vegetation Index Green"
+    vig_abbr = "VIG"
     
-    ep.plot_bands(VIG,
-              cmap='RdYlGn',
-              scale=False,
-              vmin=-1, vmax=1,
-              title="Vegetation Index Green(VIG)\n " + imgname)
-    
-    plt.savefig(os.path.join(out_path, imgname + " VIG.png"), bbox_inches='tight')
-
-    ep.hist(VIG,
-            figsize=(12, 6),
-            title="Vegetation Index Green(VIG) Histogram\n " + imgname)
-
-    plt.savefig(os.path.join(out_path, imgname + " VIG Histogram.png"), bbox_inches='tight')
-
-    write_to_file(VIG, imgname + " VIG")
-    print("VIG OK")
-
+    gen_map(VIG, img_name + "_" + vig_abbr, 'RdYlGn', -1, 1, vig_ttl + " - " + vig_abbr)
+    gen_hist(VIG, img_name + "_" + vig_abbr, vig_ttl + " - " + vig_abbr)
+    write_to_file(VIG, img_name + "_" + vig_abbr)
+    print(vig_abbr + " OK!")
+    #--------
     EXG = 2 * G - R - B
+    exg_ttl = "Excess Green Index"
+    exg_abbr = "ExG"
     
-    ep.plot_bands(EXG,
-              cmap='RdYlGn',
-              scale=False,
-              vmin=-1, vmax=1,
-              title="Excess Green Index(ExG)\n " + imgname)
-    
-    plt.savefig(os.path.join(out_path, imgname + " ExG.png"), bbox_inches='tight')
-
-    ep.hist(EXG,
-            figsize=(12, 6),
-            title="Excess Green Index(ExG) Histogram\n " + imgname)
-
-    plt.savefig(os.path.join(out_path, imgname + " ExG Histogram.png"), bbox_inches='tight')
-
-    write_to_file(EXG, imgname + " EXG")
-    print("EXG OK")
-
+    gen_map(EXG, img_name + "_" + exg_abbr, 'RdYlGn', -1, 1, exg_ttl + " - " + exg_abbr)
+    gen_hist(EXG, img_name + "_" + exg_abbr, exg_ttl + " - " + exg_abbr)
+    write_to_file(EXG, img_name + "_" + exg_abbr)
+    print(exg_abbr + " OK!")
+    #-------
     GLI = (2.0 * G - R - B) / (2.0 * G + R + B)
+    gli_ttl = "Green Leaf Index"
+    gli_abbr = "GLI"
     
-    ep.plot_bands(GLI,
-              cmap='RdYlGn',
-              scale=False,
-              vmin=-1, vmax=1,
-              title="Green Leaf Index(GLI)\n " + imgname)
-    
-    plt.savefig(os.path.join(out_path, imgname + " GLI.png"), bbox_inches='tight')
-
-    ep.hist(GLI,
-            figsize=(12, 6),
-            title="Green Leaf Index(GLI) Histogram\n " + imgname)
-
-    plt.savefig(os.path.join(out_path, imgname + " GLI Histogram.png"), bbox_inches='tight')
-
-    write_to_file(GLI, imgname + " GLI")
-    print("GLI OK")
-
+    gen_map(GLI, img_name + "_" + gli_abbr, 'RdYlGn', -1, 1, gli_ttl + " - " + gli_abbr)
+    gen_hist(GLI, img_name + "_" + gli_abbr, gli_ttl + " - " + gli_abbr)
+    write_to_file(GLI, img_name + "_" + gli_abbr)
+    print(gli_abbr + " OK!")
+    #-------
     MGRVI= (G ** 2.0 - R ** 2.0) / (G ** 2.0 + R ** 2.0)
+    mgrvi_ttl = "Modified Green Red Vegetation Index"
+    mgrvi_abbr = "MGRVI"
     
-    ep.plot_bands(MGRVI,
-              cmap='RdYlGn',
-              scale=False,
-              vmin=-1, vmax=1,
-              title="Modified Green Red Vegetation Index(MGRVI)\n " + imgname)
-    
-    plt.savefig(os.path.join(out_path, imgname + " MGRVI.png"), bbox_inches='tight')
-
-    ep.hist(MGRVI,
-            figsize=(12, 6),
-            title="Modified Green Red Vegetation Index(MGRVI) Histogram\n " + imgname)
-
-    plt.savefig(os.path.join(out_path, imgname + " MGRVI Histogram.png"), bbox_inches='tight')
-
-    write_to_file(MGRVI, imgname + " MGRVI")
-    print("MGVRI OK")
-
+    gen_map(MGRVI, img_name + "_" + mgrvi_abbr, 'RdYlGn', -1, 1, mgrvi_ttl + " - " + mgrvi_abbr)
+    gen_hist(MGRVI, img_name + "_" + mgrvi_abbr, mgrvi_ttl + " - " + mgrvi_abbr)
+    write_to_file(MGRVI, img_name + "_" + mgrvi_abbr)
+    print(mgrvi_abbr + " OK!")
+    #-------
     NDWI = (G - N) / (G + N)
+    ndwi_ttl = "Normalized Difference Water Index"
+    ndwi_abbr = "NDWI"
     
-    ep.plot_bands(NDWI,
-              cmap='RdYlGn',
-              scale=False,
-              vmin=-1, vmax=1,
-              title="Normalized Difference Water Index(NDWI)\n " + imgname)
-    
-    plt.savefig(os.path.join(out_path, imgname + " NDWI.png"), bbox_inches='tight')
-
-    ep.hist(NDWI,
-            figsize=(12, 6),
-            title="Normalized Difference Water Index(NDWI) Histogram\n " + imgname)
-
-    plt.savefig(os.path.join(out_path, imgname + " NDWI Histogram.png"), bbox_inches='tight')
-
-    write_to_file(NDWI, imgname + " NDWI")
-    print("NDWI OK")
-    
-    # NDVImax = np.nanmax(NDVI)
-    # NDVImin = np.nanmin(NDVI)
-    
-    # E = 0.4
-    # Fc = 1-(NDVImax - NDVI/NDVImax - NDVImin) ** E
-    # LAI = -2 * np.log(1-Fc)
-    
-    # ep.hist(LAI,
-    #         figsize=(12, 6),
-    #         title="Leaf Area Index(LAI) Histogram\n " + imgname)
-    
-    # plt.savefig(os.path.join(out_path, imgname + " LAI Histogram.png"), bbox_inches='tight')
-    
-    # write_to_file(LAI, imgname + " LAI")
-    # print("LAI OK")
+    gen_map(NDWI, img_name + "_" + ndwi_abbr, 'RdYlGn', -1, 1, ndwi_ttl + " - " + ndwi_abbr)
+    gen_hist(NDWI, img_name + "_" + ndwi_abbr, ndwi_ttl + " - " + ndwi_abbr)
+    write_to_file(NDWI, img_name + "_" + ndwi_abbr)
+    print(ndwi_abbr + " OK!")
+    #-------
